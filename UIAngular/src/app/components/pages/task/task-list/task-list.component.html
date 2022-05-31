@@ -1,0 +1,37 @@
+<div class="shadow bg-white rounded">
+  <div class="row">
+    <div class="col-12">
+      <label class="h4">Task List</label>
+    </div>
+  </div>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Title</th>
+        <th scope="col">Details</th>
+        <th scope="col">Progress</th>
+        <th scope="col">Options</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of taskMdlLst; index as i">
+        <th scope="row">{{ i + 1 }}</th>
+        <td>
+          {{ item.title }}
+        </td>
+        <td>{{ item.details }}</td>
+        <td>
+          <p>
+            <ngb-progressbar type="warning" [value]="item.progress_ratio" [striped]="true" [animated]="true">
+              <i>{{item.progress_ratio}}%</i></ngb-progressbar>
+          </p>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-info">Edit</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
