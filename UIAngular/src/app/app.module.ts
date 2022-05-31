@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -16,7 +18,14 @@ import { NgxNavbarModule } from 'ngx-bootstrap-navbar';
     FooterComponent,
     HomeContentComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, NgbModule, NgxNavbarModule],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    NgbModule,
+    NgxNavbarModule,
+    BrowserAnimationsModule,
+    NoopAnimationsModule,
+  ],
   providers: [],
   bootstrap: [AppComponent],
 })
