@@ -17,17 +17,26 @@ namespace RepositoryLayer
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);
-        }
 
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+            modelBuilder.Entity<TbDirectoryName>(entity =>
+            {
+                entity.ToTable("tb_DirectoryNames");
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("ID");
+            });
+
+        }
 
         #region TableEntity
         public virtual DbSet<Tasks> Tasks { get; set; } = null!;
+        public virtual DbSet<TbDirectoryName> TbDirectoryNames { get; set; } = null!;
+
         #endregion TableEntity
 
         #region ViewEntity
         //public DbSet<UsersView> UsersView { get; set; } = null!;
-       
+
         #endregion ViewEntity
 
         #region  RawSQL Entity

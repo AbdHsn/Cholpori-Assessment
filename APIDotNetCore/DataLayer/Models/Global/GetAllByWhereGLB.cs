@@ -9,13 +9,5 @@ namespace DataLayer.Models.Global
         public string SortColumn { get; set; }
         public int LimitStart { get; set; }
         public dynamic LimitEnd { get; set; }
-
-        //public GetAllByWhereGLB()
-        //{
-        //    if (LimitEnd is string)
-        //    {
-        //        this.LimitEnd = 0;
-        //    }
-        //}
     }
 }
