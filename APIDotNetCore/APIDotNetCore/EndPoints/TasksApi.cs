@@ -1,5 +1,7 @@
-﻿using DataLayer.Models.Entities;
+﻿using APIDotNetCore.SignalREndPoints;
+using DataLayer.Models.Entities;
 using DataLayer.Models.Global;
+using Microsoft.AspNetCore.SignalR;
 using RepositoryLayer;
 
 namespace APIDotNetCore.EndPoints
@@ -10,18 +12,21 @@ namespace APIDotNetCore.EndPoints
         private readonly IEntityRepo<Tasks> _task;
         private readonly IRawQueryRepo<Tasks> _taskRawSql;
         private readonly IRawQueryRepo<TotalRecordCountGLB> _taskCountRawSql;
+        private readonly IHubContext<BroadcastHub, IHubClient> _hubContext;
         #endregion
 
         #region Constructor
         public TasksApi(
            IEntityRepo<Tasks> task,
            IRawQueryRepo<Tasks> taskRawSql,
-           IRawQueryRepo<TotalRecordCountGLB> taskCountRawSql
+           IRawQueryRepo<TotalRecordCountGLB> taskCountRawSql,
+           IHubContext<BroadcastHub, IHubClient> hubContext
         )
         {
             _task = task;
             _taskRawSql = taskRawSql;
             _taskCountRawSql = taskCountRawSql;
+            _hubContext = hubContext;
         }
         #endregion
 
@@ -153,6 +158,8 @@ namespace APIDotNetCore.EndPoints
                     if (task == null)
                         return Results.BadRequest("Provide valid data.");
 
+                    task.insert_date = DateTime.Now;
+                    await _hubContext.Clients.All.BroadcastMessage("task-created");
                     return Results.Ok(await _task.Insert(task));
                 }
                 catch (Exception ex)

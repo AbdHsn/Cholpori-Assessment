@@ -9,6 +9,10 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { NgxNavbarModule } from 'ngx-bootstrap-navbar';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { CommonService } from 'src/services/common.service';
+import { ToastService } from 'src/services/toast.service';
+import { TasksService } from 'src/services/tasks.service';
 
 @NgModule({
   declarations: [AppComponent, HeaderComponent, FooterComponent],
@@ -19,8 +23,9 @@ import { NgxNavbarModule } from 'ngx-bootstrap-navbar';
     NgxNavbarModule,
     BrowserAnimationsModule,
     NoopAnimationsModule,
+    HttpClientModule,
   ],
-  providers: [],
+  providers: [HttpClient, CommonService, ToastService, TasksService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
