@@ -23,56 +23,63 @@ namespace RepositoryLayer
         #endregion "Constructors"
 
         #region "Get Methods Implementation"
-        public IEnumerable<T> GetAll()
+        public async Task<IEnumerable<T>> GetAll()
         {
-            return entities;
+            return await entities.ToListAsync();
         }
        
-        public T GetById(Expression<Func<T, bool>> predicate)
+        public async Task<T> GetById(Expression<Func<T, bool>> predicate)
         {
-            return entities.FirstOrDefault(predicate);
+            return await entities.FirstOrDefaultAsync(predicate);
         }
         #endregion "Get Methods Implementation"
 
         #region "DB Operation Methods Implementation"
 
-        public void Insert(T entity)
+        public async Task<T> Insert(T entity)
         {
             if (entity == null)
             {
-                throw new ArgumentNullException("Please provide all information correctly");
+                throw new ArgumentNullException("Insertion can't proceed on null object.");
             }
             entities.Add(entity);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+            return entity;
         }
 
-        public void Update(T entity)
+        public async Task<List<T>> InsertRange(List<T> listEntity)
         {
-            if (entity == null)
+            if (listEntity.Count <= 0)
             {
-                throw new ArgumentNullException("Please provide all information correctly");
+                throw new ArgumentNullException("Insertion can't proceed on null or zero object.");
             }
-            entities.Update(entity);
-            _context.SaveChanges();
+            entities.AddRangeAsync(listEntity);
+            await _context.SaveChangesAsync();
+            return listEntity;
         }
 
-        public void Delete(T entity)
+        public async Task<T> Update(T entity)
         {
             if (entity == null)
             {
-                throw new ArgumentNullException("Delete is not successful");
+                throw new ArgumentNullException("Update can't proceed on null object.");
+            }
+
+            entities.Update(entity);
+            await  _context.SaveChangesAsync();
+            return entity;
+        }
+
+        public async Task<bool> Delete(T entity)
+        {
+            if (entity == null)
+            {
+                throw new ArgumentNullException("Delete can't proceed on null object.");
             }
             entities.Remove(entity);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+            return true;
         }
         #endregion "DB Operation Methods Implementation"
-
-        #region "Get Methods Implementation using RawSQL"
-
-        public IQueryable<T> GetAllByRawSql(string sqlQuery)
-        {
-            return null;//_context.Set<T>().FromSqlRaw("");
-        }
-        #endregion "Get Methods Implementation using RawSQL"
     }
 }

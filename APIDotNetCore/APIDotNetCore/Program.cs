@@ -1,3 +1,4 @@
+using APIDotNetCore.EndPoints;
 using Microsoft.EntityFrameworkCore;
 using RepositoryLayer;
 
@@ -17,6 +18,7 @@ builder.Services.AddDbContext<EntityContext>(options =>
 #region DI
 builder.Services.AddScoped(typeof(IEntityRepo<>), typeof(EntityRepo<>));
 builder.Services.AddScoped(typeof(IRawQueryRepo<>), typeof(RawQueryRepo<>));
+builder.Services.AddScoped<TasksApi>();
 #endregion
 
 string CorsPolicy = "CorsPolicy";
@@ -36,7 +38,6 @@ builder.Services.AddCors(options => options.AddPolicy(name: CorsPolicy,
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -46,43 +47,8 @@ if (app.Environment.IsDevelopment())
 app.UseCors(CorsPolicy);
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-       new WeatherForecast
-       (
-           DateTime.Now.AddDays(index),
-           Random.Shared.Next(-20, 55),
-           summaries[Random.Shared.Next(summaries.Length)]
-       ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
-app.MapGet("/getDirectoryNames", async () =>
-{
-    try
-    {
-        var t = "dddd";
-
-        Results.Ok(new { id = 01, name = "Verdous"});
-    }
-    catch (Exception ex)
-    {
-        Results.BadRequest("Failed to process data.");
-    }
-})
-.WithName("DirectoryNames");
+var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider.GetService<TasksApi>();
+await services.TaskAPIEndPoints(app);
 
 app.Run();
-
-internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

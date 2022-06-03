@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace RepositoryLayer
 {
-    public partial class EntityContext : DbContext
+    public class EntityContext : DbContext
     {
         public EntityContext()
         {
@@ -15,29 +15,26 @@ namespace RepositoryLayer
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder) {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<TbDirectoryName>(entity =>
-            {
-                entity.ToTable("tb_DirectoryNames");
-                entity.Property(e => e.Id)
-                    .ValueGeneratedOnAdd()
-                    .HasColumnName("ID");
-            });
-
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
         }
 
-        #region TableEntity
+        protected override void OnModelCreating(ModelBuilder modelBuilder) {
+            modelBuilder.Entity<Tasks>(entity =>
+            {
+                entity.ToTable("Tasks");
+                entity.Property(p => p.id).ValueGeneratedOnAdd().HasColumnName("id");
+            });
+            
+            modelBuilder.Entity<TotalRecordCountGLB>(entity =>
+            {
+                entity.HasNoKey();
+            });
+        }
+
+        #region TableEntities
         public virtual DbSet<Tasks> Tasks { get; set; } = null!;
-        public virtual DbSet<TbDirectoryName> TbDirectoryNames { get; set; } = null!;
-
-        #endregion TableEntity
-
-        #region ViewEntity
-        //public DbSet<UsersView> UsersView { get; set; } = null!;
-
-        #endregion ViewEntity
+        #endregion TableEntities
 
         #region  RawSQL Entity
         public DbSet<TotalRecordCountGLB> TotalRecordCountGLB { get; set; }
