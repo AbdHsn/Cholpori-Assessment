@@ -12,6 +12,7 @@ namespace DataLayer.Models.Entities
         public string? title { get; set; }
         public string? details { get; set; }
         public double? progress_ratio { get; set; }
+        public string? status { get; set; }
         public DateTime? insert_date { get; set; }
     }
 }

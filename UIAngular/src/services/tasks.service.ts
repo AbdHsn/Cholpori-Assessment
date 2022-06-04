@@ -12,13 +12,17 @@ export class TasksService {
 
   create(formData: any) {
     return this.http
-      .post<any>(this._baseUrl + 'task-api/create', formData)
+      .post<any>(this._baseUrl + 'task-api/create', formData, {
+        headers: { 'Content-Type': 'application/json' },
+      })
       .pipe();
   }
 
   Update(formData: any) {
     return this.http
-      .put<any>(this._baseUrl + 'task-api/update', formData)
+      .put<any>(this._baseUrl + 'task-api/update', formData, {
+        headers: { 'Content-Type': 'application/json' },
+      })
       .pipe();
   }
 

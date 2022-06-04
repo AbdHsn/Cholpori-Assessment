@@ -1,4 +1,6 @@
-﻿using APIDotNetCore.SignalREndPoints;
+﻿using System.Text.Json;
+using APIDotNetCore.Models.Validation;
+using APIDotNetCore.SignalREndPoints;
 using DataLayer.Models.Entities;
 using DataLayer.Models.Global;
 using Microsoft.AspNetCore.SignalR;
@@ -88,7 +90,11 @@ namespace APIDotNetCore.EndPoints
                     {
                         foreach (var item in tableObj.searches)
                         {
-                            if (!string.IsNullOrEmpty(item.value))
+                            if (!string.IsNullOrEmpty(item.value) && item.search_by == "title")
+                            {
+                                whereConditionStatement += $@"{item.search_by} LIKE '%{item.value}%' AND ";
+                            }
+                            else if (!string.IsNullOrEmpty(item.value))
                                 whereConditionStatement += item.search_by + " = '" + item.value + "' AND ";
                         }
                         if (!string.IsNullOrEmpty(whereConditionStatement))
@@ -155,12 +161,26 @@ namespace APIDotNetCore.EndPoints
             {
                 try
                 {
+                    #region Validation
                     if (task == null)
                         return Results.BadRequest("Provide valid data.");
 
+                    var validationCheck = await new TasksValidation().ValidateAsync(task);
+
+                    if (!validationCheck.IsValid)
+                        return Results.BadRequest("Provided data is not valid.");
+
+                    #endregion Validation
+
                     task.insert_date = DateTime.Now;
-                    await _hubContext.Clients.All.BroadcastMessage("task-created");
-                    return Results.Ok(await _task.Insert(task));
+                    await _task.Insert(task);
+
+                    await _hubContext.Clients.All.BroadcastMessage(JsonSerializer.Serialize(new { 
+                        topic = "Task-Created",
+                        data = task
+                    }));
+
+                    return Results.Ok(task);
                 }
                 catch (Exception ex)
                 {
@@ -174,9 +194,14 @@ namespace APIDotNetCore.EndPoints
             {
                 try
                 {
-
+                    #region Validation
                     if (task.id <= 0)
                         return Results.BadRequest("Provide valid data.");
+
+                    var validationCheck = await new TasksValidation().ValidateAsync(task);
+
+                    if (!validationCheck.IsValid)
+                        return Results.BadRequest("Provided data is not valid.");
 
                     var getTask = await _task.GetById(x => x.id == task.id);
 
@@ -185,11 +210,22 @@ namespace APIDotNetCore.EndPoints
                         return Results.NotFound("Requested item is not found.");
                     }
 
+                    #endregion Validation
+
                     getTask.title = task.title;
-                    getTask.details = task.title;
+                    getTask.details = task.details;
+                    getTask.status = task.status;
                     getTask.progress_ratio = task.progress_ratio;
 
-                    return Results.Ok(await _task.Update(getTask));
+                    await _task.Update(getTask);
+
+                    await _hubContext.Clients.All.BroadcastMessage(JsonSerializer.Serialize(new
+                    {
+                        topic = "Task-Updated",
+                        data = getTask
+                    }));
+
+                    return Results.Ok(getTask);
                 }
                 catch (Exception ex)
                 {
@@ -212,7 +248,15 @@ namespace APIDotNetCore.EndPoints
                         return Results.NotFound("Requested item is not found.");
                     }
 
-                    return Results.Ok(await _task.Delete(getTask));
+                    await _task.Delete(getTask);
+
+                    await _hubContext.Clients.All.BroadcastMessage(JsonSerializer.Serialize(new
+                    {
+                        topic = "Task-Deleted",
+                        data = getTask
+                    }));
+
+                    return Results.Ok(true);
                 }
                 catch (Exception ex)
                 {

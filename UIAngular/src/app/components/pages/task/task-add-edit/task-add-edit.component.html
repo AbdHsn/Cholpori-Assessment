@@ -35,9 +35,9 @@
       <div class="position-relative form-group mt-2 m-1">
         <label for="iProgress">Task Completed (In Percentage)</label>
         <input [(ngModel)]="taskMdl.progress_ratio" #iProgress="ngModel" name="iProgress" id="iProgress"
-          placeholder="Progress Ratio" type="number" min="0" max="100" class="form-control" required minlength="2" />
+          placeholder="Progress Ratio" type="number" min="0" max="100" class="form-control" required />
 
-        <div *ngIf="iTitle.invalid && iProgress.dirty">
+        <div *ngIf="iProgress.invalid && iProgress.dirty">
           <label class="text-warning" *ngIf="iProgress.errors?.required">Progress Ratio is required.</label>
           <label class="text-warning" *ngIf="iProgress.errors?.min">
             Ratio can't be less than 0.
@@ -45,6 +45,19 @@
           <label class="text-warning" *ngIf="iProgress.errors?.max">
             Ratio can't be more than 100.
           </label>
+        </div>
+      </div>
+
+      <div class="position-relative form-group mt-2 m-1">
+        <label for="iProgress">Task Status</label>
+        <select name="iStatus" [(ngModel)]="taskMdl.status" #iStatus="ngModel" class="form-select" id="iStatus"
+          required>
+          <option value="">Choose Status</option>
+          <option *ngFor="let item of statusDdlLst" [value]="item.value">{{item.title}}</option>
+        </select>
+
+        <div *ngIf="iStatus.invalid && iStatus.dirty">
+          <label class="text-warning" *ngIf="iStatus.errors?.required">Select valid status.</label>
         </div>
       </div>
 

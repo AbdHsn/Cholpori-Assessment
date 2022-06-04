@@ -14,8 +14,8 @@ builder.Services.AddCors();
 builder.Services.AddDbContext<EntityContext>(options =>
 {
     //options.UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]);
-    options.UseMySql(builder.Configuration["ConnectionStrings:DefaultConnection"], ServerVersion.AutoDetect(builder.Configuration["ConnectionStrings:DefaultConnection"]));
-    //options.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]);
+    //options.UseMySql(builder.Configuration["ConnectionStrings:DefaultConnection"], ServerVersion.AutoDetect(builder.Configuration["ConnectionStrings:DefaultConnection"]));
+    options.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]);
 });
 
 #region DI
@@ -30,7 +30,7 @@ builder.Services.AddCors(options => options.AddPolicy(name: CorsPolicy,
     {
         builder.AllowAnyHeader()
                .AllowAnyMethod()
-               .SetIsOriginAllowed((host) => true)
+               .AllowAnyOrigin()
                .WithOrigins(
                                 "http://localhost:4200",
                                 "https://localhost:4200"

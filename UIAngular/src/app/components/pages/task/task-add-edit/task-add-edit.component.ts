@@ -1,7 +1,11 @@
+import {
+  CommonService,
+  enumToList,
+} from './../../../../../services/common.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { Tasks } from 'src/models/task-model';
+import { Tasks, TaskStatus } from 'src/models/task-model';
 import { TasksService } from 'src/services/tasks.service';
 import { ToastService } from 'src/services/toast.service';
 
@@ -12,15 +16,22 @@ import { ToastService } from 'src/services/toast.service';
 })
 export class TaskAddEditComponent implements OnInit {
   taskMdl: Tasks = new Tasks();
+  statusDdlLst: any[] = [];
   title: string = '';
 
   constructor(
     public _activeModal: NgbActiveModal,
     public _toastService: ToastService,
     public _taskSrv: TasksService
-  ) {}
+  ) {
+    this.statusDdlLst = enumToList(TaskStatus);
+  }
 
-  ngOnInit() {}
+  ngOnInit() {
+    if (this.taskMdl.id <= 0) {
+      this.taskMdl.status = null;
+    }
+  }
 
   saveTask() {
     if (this.taskMdl.id > 0) {
@@ -43,13 +54,7 @@ export class TaskAddEditComponent implements OnInit {
         }
       );
     } else {
-      this.taskMdl.id = 0;
-      this.taskMdl.insert_date = new Date();
-
-      let formData = new FormData();
-      formData.append('task', JSON.stringify(this.taskMdl));
-
-      this._taskSrv.create(formData).subscribe(
+      this._taskSrv.create(JSON.stringify(this.taskMdl)).subscribe(
         (result) => {
           this._toastService.show(
             `Task ${this.taskMdl.title} created successfully`,
