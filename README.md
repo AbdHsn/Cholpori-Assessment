@@ -15,3 +15,13 @@
 ✓ Bootstrap uses to make interface responsive.
 ✓ Loader implemented while feteching, creating and updating.
 ✓ Toast notification implemented for messaging.
+
+#Installation Instruction.
+------Angular-------
+● Need to reinstall node module after download project using command 'npm i'
+● Need to run angular project with port: 4200
+
+------.Net Core------
+● Need Visual Studio 2022 or Latest Version.
+● .Net Core 6 sdk need to be installed.
+● No need to update or change database connection as it used online connection.
