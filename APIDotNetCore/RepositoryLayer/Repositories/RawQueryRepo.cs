@@ -23,38 +23,23 @@ namespace RepositoryLayer
             string sql = default(string);
             if (string.IsNullOrEmpty(getAllByWhereGLB.WhereConditions))
             {
-                if (getAllByWhereGLB.LimitEnd == 0)
+                if (getAllByWhereGLB.LimitRange == 0)
                 {
-                    //mysql
-                    sql = string.Format("SELECT * FROM {0} ORDER BY {1}",
-                        getAllByWhereGLB.TableOrViewName, getAllByWhereGLB.SortColumn);
-
+                    sql = $@"SELECT * FROM ""{getAllByWhereGLB.TableOrViewName}"" ORDER BY {getAllByWhereGLB.SortColumn}";
                 }
                 else {
-                    //mysql
-                    sql = string.Format("SELECT * FROM {0} ORDER BY {1} LIMIT {2}, {3}",
-                        getAllByWhereGLB.TableOrViewName, getAllByWhereGLB.SortColumn, getAllByWhereGLB.LimitStart, getAllByWhereGLB.LimitEnd);
-
+                    sql = $@"SELECT * FROM ""{getAllByWhereGLB.TableOrViewName}"" ORDER BY {getAllByWhereGLB.SortColumn} OFFSET {getAllByWhereGLB.LimitIndex} LIMIT {getAllByWhereGLB.LimitRange}";
                 }
-
-
             }
             else
             {
-                if (getAllByWhereGLB.LimitEnd == 0)
+                if (getAllByWhereGLB.LimitRange == 0)
                 {
-                    //mysql
-                    sql = string.Format("SELECT * FROM {0} WHERE {1} ORDER BY {2}",
-                          getAllByWhereGLB.TableOrViewName, getAllByWhereGLB.WhereConditions, getAllByWhereGLB.SortColumn);
-
+                    sql = $@"SELECT * FROM ""{getAllByWhereGLB.TableOrViewName}"" WHERE {getAllByWhereGLB.WhereConditions} ORDER BY {getAllByWhereGLB.SortColumn}";
                 }
                 else {
-                    //mysql
-                    sql = string.Format("SELECT * FROM {0} WHERE {1} ORDER BY {2} LIMIT {3}, {4}",
-                          getAllByWhereGLB.TableOrViewName, getAllByWhereGLB.WhereConditions, getAllByWhereGLB.SortColumn, getAllByWhereGLB.LimitStart, getAllByWhereGLB.LimitEnd);
-
+                    sql = $@"SELECT * FROM ""{getAllByWhereGLB.TableOrViewName}"" WHERE {getAllByWhereGLB.WhereConditions} ORDER BY {getAllByWhereGLB.SortColumn} OFFSET {getAllByWhereGLB.LimitIndex} LIMIT {getAllByWhereGLB.LimitRange}";
                 }
-
             }
 
             var returnData = await _context.Set<T>().FromSqlRaw(sql).AsNoTracking().ToListAsync();
@@ -66,11 +51,11 @@ namespace RepositoryLayer
             string sql = default(string);
             if (string.IsNullOrWhiteSpace(countAllByWhereGLB.WhereConditions))
             {
-                sql =  string.Format("SELECT Count(Id) AS TotalRecord FROM {0}", countAllByWhereGLB.TableOrViewName);
+                sql = $@"SELECT Count(id) AS TotalRecord FROM ""{countAllByWhereGLB.TableOrViewName}""";
             }
             else
             {
-                sql = string.Format("SELECT Count(Id) AS TotalRecord FROM {0} WHERE {1}", countAllByWhereGLB.TableOrViewName, countAllByWhereGLB.WhereConditions);
+                sql = $@"SELECT Count(id) AS TotalRecord FROM ""{countAllByWhereGLB.TableOrViewName}"" WHERE {countAllByWhereGLB.WhereConditions}";
             }
             return await _context.Set<T>().FromSqlRaw(sql).AsNoTracking().FirstOrDefaultAsync();
         }

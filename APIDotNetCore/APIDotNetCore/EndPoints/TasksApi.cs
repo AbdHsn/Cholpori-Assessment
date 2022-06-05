@@ -32,6 +32,7 @@ namespace APIDotNetCore.EndPoints
         }
         #endregion
 
+        #region API Endpoint Function
         public async Task TaskAPIEndPoints(WebApplication app)
         {
             app.MapGet("/task-api/get", async () =>
@@ -45,9 +46,8 @@ namespace APIDotNetCore.EndPoints
                     string error = ex.ToString();
                     return Results.BadRequest("Failed to proceed.");
                 }
-
             });
-            
+
             app.MapPost("/task-api/get-grid", async (DatatableGLB tableObj) =>
             {
                 try
@@ -78,7 +78,7 @@ namespace APIDotNetCore.EndPoints
                     else
                     {
                         //assign default sort info base on column
-                        sortInformation = "Id DESC";
+                        sortInformation = "insert_date DESC";
                     }
 
 
@@ -92,7 +92,7 @@ namespace APIDotNetCore.EndPoints
                         {
                             if (!string.IsNullOrEmpty(item.value) && item.search_by == "title")
                             {
-                                whereConditionStatement += $@"{item.search_by} LIKE '%{item.value}%' AND ";
+                                whereConditionStatement += $@"{item.search_by} ILIKE '%{item.value}%' AND ";
                             }
                             else if (!string.IsNullOrEmpty(item.value))
                                 whereConditionStatement += item.search_by + " = '" + item.value + "' AND ";
@@ -111,8 +111,8 @@ namespace APIDotNetCore.EndPoints
                         TableOrViewName = "Tasks",
                         SortColumn = sortInformation,
                         WhereConditions = whereConditionStatement,
-                        LimitStart = tableObj.start,
-                        LimitEnd = rowSize
+                        LimitIndex = tableObj.start,
+                        LimitRange = rowSize
                     });
 
                     var dataGridCount = await _taskCountRawSql.CountAllByWhere(new CountAllByWhereGLB()
@@ -123,9 +123,10 @@ namespace APIDotNetCore.EndPoints
 
                     #endregion database query code
 
-                    return Results.Ok(new {
+                    return Results.Ok(new
+                    {
                         data = dataGrid,
-                        totalRecords = dataGridCount.TotalRecord
+                        totalRecords = dataGridCount.totalrecord
                     });
                 }
                 catch (Exception ex)
@@ -172,10 +173,11 @@ namespace APIDotNetCore.EndPoints
 
                     #endregion Validation
 
-                    task.insert_date = DateTime.Now;
+                    task.insert_date = DateTime.UtcNow;
                     await _task.Insert(task);
 
-                    await _hubContext.Clients.All.BroadcastMessage(JsonSerializer.Serialize(new { 
+                    await _hubContext.Clients.All.BroadcastMessage(JsonSerializer.Serialize(new
+                    {
                         topic = "Task-Created",
                         data = task
                     }));
@@ -266,5 +268,6 @@ namespace APIDotNetCore.EndPoints
 
             });
         }
+        #endregion
     }
 }

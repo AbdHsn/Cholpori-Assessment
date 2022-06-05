@@ -6,8 +6,8 @@ import { TasksService } from 'src/services/tasks.service';
 import { ToastService } from 'src/services/toast.service';
 import { DeleteDialogComponent } from '../../common-pages/delete-dialog/delete-dialog.component';
 import { TaskAddEditComponent } from '../task-add-edit/task-add-edit.component';
-import * as signalR from '@microsoft/signalr';
 import { SignalRResponse } from 'src/models/signal-r-response';
+import { CommonService } from 'src/services/common.service';
 
 @Component({
   selector: 'app-task-list',
@@ -16,11 +16,11 @@ import { SignalRResponse } from 'src/models/signal-r-response';
 })
 export class TaskListComponent implements OnInit {
   taskMdlLst: Tasks[] = [];
-
+  isLoading: boolean = false;
   searchByTitle: string = '';
 
   orderColumn = {
-    column: 'id',
+    column: 'insert_date',
     order_by: 'DESC',
   };
 
@@ -32,29 +32,44 @@ export class TaskListComponent implements OnInit {
   constructor(
     private _taskSrv: TasksService,
     private modalService: NgbModal,
-    private _toastSrv: ToastService
+    private _toastSrv: ToastService,
+    private _commonSrv: CommonService
   ) {}
 
   ngOnInit() {
     this.getTaskGrid();
-
     this.initializeSignalR();
   }
 
   getTaskGrid() {
-    let postData = {
-      columns: [],
-      orders: [this.orderColumn],
-      start: (this.page - 1) * this.rowSize,
-      length: this.rowSize.toString(),
-      search: {},
-      searches: [{ search_by: 'title', value: this.searchByTitle }],
-    };
+    try {
+      let postData = {
+        columns: [],
+        orders: [this.orderColumn],
+        start: (this.page - 1) * this.rowSize,
+        length: this.rowSize.toString(),
+        search: {},
+        searches: [{ search_by: 'title', value: this.searchByTitle }],
+      };
 
-    this._taskSrv.getGrid(postData).subscribe((res) => {
-      this.taskMdlLst = res.data as Tasks[];
-      this.totalRecord = res.totalRecords as number;
-    });
+      this.isLoading = true;
+      this._taskSrv.getGrid(postData).subscribe(
+        (res) => {
+          this.taskMdlLst = res.data as Tasks[];
+          this.totalRecord = res.totalRecords as number;
+          this.isLoading = false;
+        },
+        (error: HttpErrorResponse) => {
+          this.isLoading = false;
+          this._toastSrv.show(error.error, {
+            classname: 'bg-danger text-light',
+            delay: 10000,
+          });
+        }
+      );
+    } catch (error) {
+      this.isLoading = false;
+    }
   }
 
   onRowSizeOptionChange(selectedSizeOption: any): void {
@@ -64,7 +79,6 @@ export class TaskListComponent implements OnInit {
   }
 
   onPaginationChange(pageNumber: any) {
-    console.log('pagination changed: ', pageNumber);
     this.page = pageNumber;
     this.getTaskGrid();
   }
@@ -86,9 +100,7 @@ export class TaskListComponent implements OnInit {
       (result) => {
         //this.getTaskGrid();
       },
-      (reason) => {
-        console.log('Dismissed');
-      }
+      (reason) => {}
     );
   }
 
@@ -101,39 +113,41 @@ export class TaskListComponent implements OnInit {
       (result) => {
         // this.getTaskGrid();
       },
-      (reason) => {
-        console.log('Dismissed');
-      }
+      (reason) => {}
     );
   }
 
   onDeleteClick(item: Tasks) {
-    const modalRef = this.modalService.open(DeleteDialogComponent, {
-      centered: true,
-    });
-    modalRef.componentInstance.title = `Task "${item.title}"`;
-    modalRef.result.then((result) => {
-      if (result as boolean) {
-        this._taskSrv.Delete(item.id).subscribe(
-          (res) => {
-            if (res as boolean) {
-              this._toastSrv.show(`Task ${item.title} successfully deleted.`, {
-                classname: 'bg-success text-light',
+    try {
+      const modalRef = this.modalService.open(DeleteDialogComponent, {
+        centered: true,
+      });
+      modalRef.componentInstance.title = `Task "${item.title}"`;
+      modalRef.result.then((result) => {
+        if (result as boolean) {
+          this._taskSrv.Delete(item.id).subscribe(
+            (res) => {
+              if (res as boolean) {
+                this._toastSrv.show(
+                  `Task ${item.title} successfully deleted.`,
+                  {
+                    classname: 'bg-success text-light',
+                    delay: 10000,
+                  }
+                );
+                //this.getTaskGrid();
+              }
+            },
+            (error: HttpErrorResponse) => {
+              this._toastSrv.show(error.error, {
+                classname: 'bg-danger text-light',
                 delay: 10000,
               });
-              //this.getTaskGrid();
             }
-          },
-          (error: HttpErrorResponse) => {
-            console.log('eeeee', error.error);
-            this._toastSrv.show(error.error, {
-              classname: 'bg-danger text-light',
-              delay: 10000,
-            });
-          }
-        );
-      }
-    });
+          );
+        }
+      });
+    } catch (error) {}
   }
 
   onSearchByTitle(event: any) {
@@ -143,30 +157,18 @@ export class TaskListComponent implements OnInit {
   }
 
   initializeSignalR() {
-    const connection = new signalR.HubConnectionBuilder()
-      .configureLogging(signalR.LogLevel.Information)
-      .withUrl(this._taskSrv._baseUrl + 'broadcast-message')
-      .build();
-
-    connection
-      .start()
-      .then(function () {
-        console.log('SignalR Connected!');
-      })
-      .catch(function (err) {
-        return console.error(err.toString());
-      });
+    let connection = this._commonSrv.signalRConnectionInitilization();
 
     connection.on('BroadcastMessage', (result) => {
       let getTopic = JSON.parse(result as string) as SignalRResponse;
       let latestTask = getTopic.data as Tasks;
 
-      console.log('got topics:', getTopic, latestTask);
-
       switch (getTopic.topic) {
-        case 'Task-Created':
+        case 'Task-Created': {
           this.taskMdlLst.push(latestTask);
+          this.totalRecord = this.totalRecord + 1;
           break;
+        }
         case 'Task-Updated': {
           let getExistedTask = this.taskMdlLst.find(
             (f) => f.id == latestTask.id
@@ -188,11 +190,16 @@ export class TaskListComponent implements OnInit {
               (f) => f.id != latestTask.id
             );
           }
+          this.totalRecord = this.totalRecord - 1;
           break;
         }
         default:
           break;
       }
     });
+  }
+
+  showStandard() {
+    this._toastSrv.show('I am a standard toast');
   }
 }

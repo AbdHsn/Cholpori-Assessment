@@ -13,8 +13,6 @@ builder.Services.AddCors();
 
 builder.Services.AddDbContext<EntityContext>(options =>
 {
-    //options.UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]);
-    //options.UseMySql(builder.Configuration["ConnectionStrings:DefaultConnection"], ServerVersion.AutoDetect(builder.Configuration["ConnectionStrings:DefaultConnection"]));
     options.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]);
 });
 

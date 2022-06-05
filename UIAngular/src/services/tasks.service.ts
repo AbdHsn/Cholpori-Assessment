@@ -33,12 +33,10 @@ export class TasksService {
   }
 
   getGrid(dataTable: any) {
-    console.log(this._baseUrl);
     return this.http.post<any>(this._baseUrl + 'task-api/get-grid', dataTable);
   }
 
   get() {
-    console.log('URL', this._baseUrl + 'task-api/get');
     return this.http.get(this._baseUrl + 'task-api/get');
   }
 

@@ -13,9 +13,17 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonService } from 'src/services/common.service';
 import { ToastService } from 'src/services/toast.service';
 import { TasksService } from 'src/services/tasks.service';
+import { ToastsContainer } from 'src/services/ToastsContainer.component';
+import { NgbdToastGlobal } from './components/pages/common-pages/toast-global/toast-global.component';
 
 @NgModule({
-  declarations: [AppComponent, HeaderComponent, FooterComponent],
+  declarations: [
+    AppComponent,
+    HeaderComponent,
+    FooterComponent,
+    ToastsContainer,
+    NgbdToastGlobal,
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -26,6 +34,6 @@ import { TasksService } from 'src/services/tasks.service';
     HttpClientModule,
   ],
   providers: [HttpClient, CommonService, ToastService, TasksService],
-  bootstrap: [AppComponent],
+  bootstrap: [AppComponent, NgbdToastGlobal],
 })
 export class AppModule {}

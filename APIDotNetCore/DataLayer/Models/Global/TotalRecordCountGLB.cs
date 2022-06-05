@@ -6,6 +6,6 @@ namespace DataLayer.Models.Global
 {
     public class TotalRecordCountGLB
     {
-        public int TotalRecord { get; set; }
+        public int totalrecord { get; set; }
     }
 }

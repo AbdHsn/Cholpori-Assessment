@@ -14,7 +14,5 @@ import {
 export class HeaderComponent implements DoCheck {
   constructor() {}
 
-  ngDoCheck() {
-    // console.count('checked');
-  }
+  ngDoCheck() {}
 }

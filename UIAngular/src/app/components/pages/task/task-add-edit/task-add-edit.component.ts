@@ -16,6 +16,7 @@ import { ToastService } from 'src/services/toast.service';
 })
 export class TaskAddEditComponent implements OnInit {
   taskMdl: Tasks = new Tasks();
+  isProcessing: boolean = false;
   statusDdlLst: any[] = [];
   title: string = '';
 
@@ -34,44 +35,52 @@ export class TaskAddEditComponent implements OnInit {
   }
 
   saveTask() {
-    if (this.taskMdl.id > 0) {
-      this._taskSrv.Update(JSON.stringify(this.taskMdl)).subscribe(
-        (result) => {
-          this._toastService.show(
-            `Task ${this.taskMdl.title} updated successfully`,
-            {
-              classname: 'bg-success text-light',
+    try {
+      if (this.taskMdl.id > 0) {
+        this.isProcessing = true;
+        this._taskSrv.Update(JSON.stringify(this.taskMdl)).subscribe(
+          (result) => {
+            this._toastService.show(
+              `Task ${this.taskMdl.title} updated successfully`,
+              {
+                classname: 'bg-success text-light',
+                delay: 10000,
+              }
+            );
+            this.isProcessing = false;
+            this._activeModal.close(true);
+          },
+          (error: HttpErrorResponse) => {
+            this.isProcessing = false;
+            this._toastService.show(error.error, {
+              classname: 'bg-danger text-light',
               delay: 10000,
-            }
-          );
-          this._activeModal.close(true);
-        },
-        (error: HttpErrorResponse) => {
-          this._toastService.show(error.error, {
-            classname: 'bg-danger text-light',
-            delay: 10000,
-          });
-        }
-      );
-    } else {
-      this._taskSrv.create(JSON.stringify(this.taskMdl)).subscribe(
-        (result) => {
-          this._toastService.show(
-            `Task ${this.taskMdl.title} created successfully`,
-            {
-              classname: 'bg-success text-light',
+            });
+          }
+        );
+      } else {
+        this.isProcessing = true;
+        this._taskSrv.create(JSON.stringify(this.taskMdl)).subscribe(
+          (result) => {
+            this._toastService.show(
+              `Task ${this.taskMdl.title} created successfully`,
+              {
+                classname: 'bg-success text-light',
+                delay: 10000,
+              }
+            );
+            this.isProcessing = false;
+            this._activeModal.close(true);
+          },
+          (error: HttpErrorResponse) => {
+            this.isProcessing = false;
+            this._toastService.show(error.error, {
+              classname: 'bg-danger text-light',
               delay: 10000,
-            }
-          );
-          this._activeModal.close(true);
-        },
-        (error: HttpErrorResponse) => {
-          this._toastService.show(error.error, {
-            classname: 'bg-danger text-light',
-            delay: 10000,
-          });
-        }
-      );
-    }
+            });
+          }
+        );
+      }
+    } catch (error) {}
   }
 }
